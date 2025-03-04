@@ -1,7 +1,7 @@
 import os
 import requests
 import logging
-from scan import IaCScanner
+from scan import IaCScanner, SecretScanner
 from utils import ConfigValidator, upload_results, handle_failure
 
 logging.basicConfig(level=logging.INFO)
@@ -33,6 +33,18 @@ def run_scan():
         exit_code, result_file = IaCScannerObj.run()
         upload_results(result_file, accuknox_endpoint, accuknox_tenant, accuknox_label, accuknox_token, "IAC")
         handle_failure(exit_code, input_soft_fail)
+    elif(scan_type == "SECRET"):
+        results = os.environ.get('RESULTS', None)
+        branch = os.environ.get('BRANCH', None)
+        exclude_paths = os.environ.get('EXCLUDE_PATHS', None)
+        additional_arguments = os.environ.get('ADDITIONAL_ARGUMENTS', None)
+        ConfigValidatorObj.validate_secret_scan(results, branch, exclude_paths, additional_arguments)
+        SecretScannerObj = SecretScanner(results, branch, exclude_paths, additional_arguments)
+        exit_code, result_file = SecretScannerObj.run()
+        upload_results(result_file, accuknox_endpoint, accuknox_tenant, accuknox_label, accuknox_token, "TruffleHog")
+        handle_failure(exit_code, input_soft_fail)
+    else:
+        pass
 
 if __name__ == '__main__':
     run_scan()

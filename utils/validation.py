@@ -33,6 +33,12 @@ class IaCScannerConfig(BaseModel):
     INPUT_QUIET: bool
     INPUT_FRAMEWORK: Optional[str]
 
+class SecretScannerConfig(BaseModel):
+    RESULTS: Optional[str]
+    BRANCH: Optional[str]
+    EXCLUDE_PATHS: Optional[str]
+    ADDITIONAL_ARGUMENTS: Optional[str]
+
 class ConfigValidator:
     def __init__(self, scan_type, accuknox_endpoint, accuknox_tenant, accuknox_label, accuknox_token, input_soft_fail):
         try:
@@ -59,6 +65,19 @@ class ConfigValidator:
                 INPUT_COMPACT=input_compact,
                 INPUT_QUIET=input_quiet,
                 INPUT_FRAMEWORK=input_framework
+            )
+        except ValidationError as e:
+            for error in e.errors():
+                logger.error(f"{error['loc'][0]}: {error['msg']}")
+            exit(1)
+
+    def validate_secret_scan(self, results, branch, exclude_paths, additional_arguments):
+        try:
+            self.config = SecretScannerConfig(
+                RESULTS=results,
+                BRANCH=branch,
+                EXCLUDE_PATHS=exclude_paths,
+                ADDITIONAL_ARGUMENTS=additional_arguments,
             )
         except ValidationError as e:
             for error in e.errors():
