@@ -54,8 +54,6 @@ class IaCScanner:
             if isinstance(data, dict):
                 data = [data]
 
-            repo_link = os.getenv('REPO_URL', 'unknown_repo')
-            branch = os.getenv('REPO_BRANCH', 'unknown_branch')
             data.append({
                 "details": {
                     "repo":   self.repo_url,

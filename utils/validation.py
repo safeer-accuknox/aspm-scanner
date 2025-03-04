@@ -25,8 +25,8 @@ class Config(BaseModel):
         return v
 
 class IaCScannerConfig(BaseModel):
-    REPO_URL: str
-    REPO_BRANCH: str
+    REPOSITORY_URL: str
+    REPOSITORY_BRANCH: str
     INPUT_FILE: str
     INPUT_DIRECTORY: str 
     INPUT_COMPACT: bool
@@ -58,8 +58,8 @@ class ConfigValidator:
     def validate_iac_scan(self, repo_url, repo_branch, input_file, input_directory, input_compact, input_quiet, input_framework):
         try:
             self.config = IaCScannerConfig(
-                REPO_URL=repo_url,
-                REPO_BRANCH=repo_branch,
+                REPOSITORY_URL=repo_url,
+                REPOSITORY_BRANCH=repo_branch,
                 INPUT_FILE=input_file,
                 INPUT_DIRECTORY=input_directory,
                 INPUT_COMPACT=input_compact,

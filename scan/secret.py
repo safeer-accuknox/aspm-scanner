@@ -64,6 +64,6 @@ class SecretScanner:
             return ""
         elif self.branch:
             return f"--branch={self.branch}"
-        elif os.getenv("REPO_COMMIT"):
-            return f"--branch={os.getenv('REPO_COMMIT')}"
+        elif os.getenv("REPOSITORY_COMMIT_SHA"):
+            return f"--branch={os.getenv('REPOSITORY_COMMIT_SHA')}"
         return ""

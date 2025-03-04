@@ -26,8 +26,8 @@ def run_scan():
         input_compact = os.environ.get('INPUT_COMPACT', 'False').lower() == 'true'
         input_quiet = os.environ.get('INPUT_QUIET', 'False').lower() == 'true'
         input_framework = os.environ.get('INPUT_FRAMEWORK', None)
-        repo_url = os.environ.get('REPO_URL', None)
-        repo_branch = os.environ.get('REPO_BRANCH', None)
+        repo_url = os.environ.get('REPOSITORY_URL', None)
+        repo_branch = os.environ.get('REPOSITORY_BRANCH', None)
         ConfigValidatorObj.validate_iac_scan(repo_url, repo_branch, input_file, input_directory, input_compact, input_quiet, input_framework)
         IaCScannerObj = IaCScanner(repo_url, repo_branch, input_file, input_directory, input_compact, input_quiet, input_framework)
         exit_code, result_file = IaCScannerObj.run()
