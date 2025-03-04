@@ -2,7 +2,7 @@ import os
 import requests
 import logging
 from scan import IaCScanner
-from utils import ConfigValidator, upload_results
+from utils import ConfigValidator, upload_results, handle_failure
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -32,6 +32,7 @@ def run_scan():
         IaCScannerObj = IaCScanner(repo_url, repo_branch, input_file, input_directory, input_compact, input_quiet, input_framework)
         exit_code, result_file = IaCScannerObj.run()
         upload_results(result_file, accuknox_endpoint, accuknox_tenant, accuknox_label, accuknox_token, "IAC")
+        handle_failure(exit_code, input_soft_fail)
 
 if __name__ == '__main__':
     run_scan()
