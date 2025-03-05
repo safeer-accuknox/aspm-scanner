@@ -42,6 +42,10 @@ class IaCScanner:
         logger.info(result.stdout)
         logger.error(result.stderr)
 
+        if not os.path.exists(self.result_file):
+            logger.info("No results found. Skipping API upload.")
+            return result.returncode, None
+
         self.process_result_file()
         return result.returncode, self.result_file
 

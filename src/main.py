@@ -29,8 +29,8 @@ def run_scan():
     if(scan_type == "IAC"):
         input_file = os.environ.get('INPUT_FILE', '')
         input_directory = os.environ.get('INPUT_DIRECTORY', './')
-        input_compact = os.environ.get('INPUT_COMPACT', 'False').lower() == 'true'
-        input_quiet = os.environ.get('INPUT_QUIET', 'False').lower() == 'true'
+        input_compact = os.environ.get('INPUT_COMPACT', 'True').lower() == 'true'
+        input_quiet = os.environ.get('INPUT_QUIET', 'True').lower() == 'true'
         input_framework = os.environ.get('INPUT_FRAMEWORK', None)
         repo_url = os.environ.get('REPOSITORY_URL', None)
         repo_branch = os.environ.get('REPOSITORY_BRANCH', None)

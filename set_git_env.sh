@@ -12,10 +12,4 @@ if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 
     # Extract the repository name from the REPOSITORY_URL
     export REPOSITORY_NAME=$(basename -s .git $REPOSITORY_URL)
-
-
-    echo $REPOSITORY_URL
-    echo $REPOSITORY_BRANCH
-    echo $REPOSITORY_COMMIT_SHA
-    echo $REPOSITORY_NAME
 fi
