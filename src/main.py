@@ -7,6 +7,12 @@ from utils import ConfigValidator, upload_results, handle_failure
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+def clean_env_vars():
+    """Removes surrounding single or double quotes from all environment variables."""
+    for key, value in os.environ.items():
+        if value and ((value.startswith("'") and value.endswith("'")) or (value.startswith('"') and value.endswith('"'))):
+            os.environ[key] = value[1:-1]
+clean_env_vars()
 
 scan_type = os.environ.get('SCAN_TYPE', None)
 accuknox_endpoint = os.environ.get('ACCUKNOX_ENDPOINT', None)
