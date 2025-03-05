@@ -1,9 +1,12 @@
 import requests
-
+import urllib3
 import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+# Suppress SSL warnings
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def upload_results(result_file, endpoint, tenant_id, label, token, data_type):
     """Upload the result JSON to the specified endpoint."""
@@ -22,7 +25,8 @@ def upload_results(result_file, endpoint, tenant_id, label, token, data_type):
                     "label_id": label,
                     "save_to_s3": "true"
                 },
-                files={"file": file}
+                files={"file": file},
+                verify=False  # Bypass SSL verification
             )
         response.raise_for_status()
         logger.info(f"Upload successful. Response: {response.status_code}")
