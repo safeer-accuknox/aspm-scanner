@@ -5,8 +5,8 @@ WORKDIR $WORKDIR
 COPY ./src .
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r ./requirements.txt
-COPY entrypoint.sh set_git_env.sh /
-RUN chmod +x /entrypoint.sh && chmod +x /set_git_env.sh
+COPY *.sh /
+RUN chmod +x /*.sh
 
 RUN apt update -y && apt install curl git -y
 RUN curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin
