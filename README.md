@@ -67,10 +67,37 @@ Tthe following optional environment variables can be set:
 | **EXCLUDE_PATHS**       | Paths to exclude from the scan.                                                                     | `""`                               |
 | **ADDITIONAL_ARGUMENTS**| Extra parameters for secret scanning.                                                               | `""`                               |
 
-## Mounting Repositories
-Code repositories should be mounted at `/src` to enable scanning. Ensure that your working directory is correctly mapped when running the container.
+## **Mounting Repositories**  
+Code repositories should be mounted at `/src` to enable scanning. Ensure that your working directory is correctly mapped when running the container.  
 
-## Example Usage
+## **Example Usage**  
+To run the scanner with a mounted repository:  
 ```sh
 docker run --rm -ti --env-file .env -v $PWD:/src accuknoxaspm
 ```
+
+If you don't have a local repository to mount, you can specify a repository URL using environment variables.  
+
+## **Cloning a Repository**  
+If `/src` is not mounted, the scanner will attempt to clone the repository specified in the environment variables.  
+
+### **Environment Variables:**  
+- `REPOSITORY_URL` → The Git repository URL to clone. (**Required if not mounting a repository**)  
+- `REPOSITORY_BRANCH` → (Optional) The branch to clone. If not provided, the default branch is used.  
+- `REPOSITORY_USERNAME` → (Optional) Username for private repositories.  
+- `REPOSITORY_ACCESS_TOKEN` → (Optional) Access token for private repositories.  
+
+### **Example Usage for Cloning**  
+```sh
+docker run --rm -ti --env-file .env accuknoxaspm
+```
+Ensure `.env` contains:  
+```sh
+REPOSITORY_URL=https://github.com/safeer-accuknox/aspm-scanner
+REPOSITORY_BRANCH=main
+REPOSITORY_USERNAME=myusername
+REPOSITORY_ACCESS_TOKEN=myaccesstoken
+```
+
+### **Authentication for Private Repositories**  
+If cloning a private repository, ensure `REPOSITORY_USERNAME` and `REPOSITORY_ACCESS_TOKEN` are provided.  
