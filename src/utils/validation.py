@@ -33,6 +33,22 @@ class IaCScannerConfig(BaseModel):
     INPUT_QUIET: bool
     INPUT_FRAMEWORK: Optional[str]
 
+    @field_validator("REPOSITORY_URL", mode="before")
+    @classmethod
+    def validate_repository_url(cls, v):
+        if not v:
+            raise ValueError("Unable to retrieve REPOSITORY_URL from Git metadata. Please set the REPOSITORY_URL environment variable.")
+        if not isinstance(v, str) or not v.startswith("http"):
+            raise ValueError("Invalid REPOSITORY_URL. It must be a valid URL starting with 'http'.")
+        return v
+
+    @field_validator("REPOSITORY_BRANCH", mode="before")
+    @classmethod
+    def validate_repository_branch(cls, v):
+        if not isinstance(v, str) or not v.strip():
+            raise ValueError("Unable to retrieve REPOSITORY_BRANCH from Git metadata. Please set the REPOSITORY_BRANCH environment variable.")
+        return v
+
 class SecretScannerConfig(BaseModel):
     RESULTS: Optional[str]
     BRANCH: Optional[str]

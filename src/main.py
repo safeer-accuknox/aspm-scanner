@@ -31,7 +31,8 @@ def run_scan():
         ConfigValidatorObj.validate_iac_scan(repo_url, repo_branch, input_file, input_directory, input_compact, input_quiet, input_framework)
         IaCScannerObj = IaCScanner(repo_url, repo_branch, input_file, input_directory, input_compact, input_quiet, input_framework)
         exit_code, result_file = IaCScannerObj.run()
-        upload_results(result_file, accuknox_endpoint, accuknox_tenant, accuknox_label, accuknox_token, "IAC")
+        if(result_file):
+            upload_results(result_file, accuknox_endpoint, accuknox_tenant, accuknox_label, accuknox_token, "IAC")
         handle_failure(exit_code, input_soft_fail)
     elif(scan_type == "SECRET"):
         results = os.environ.get('RESULTS', None)
@@ -41,7 +42,8 @@ def run_scan():
         ConfigValidatorObj.validate_secret_scan(results, branch, exclude_paths, additional_arguments)
         SecretScannerObj = SecretScanner(results, branch, exclude_paths, additional_arguments)
         exit_code, result_file = SecretScannerObj.run()
-        upload_results(result_file, accuknox_endpoint, accuknox_tenant, accuknox_label, accuknox_token, "TruffleHog")
+        if(result_file):
+            upload_results(result_file, accuknox_endpoint, accuknox_tenant, accuknox_label, accuknox_token, "TruffleHog")
         handle_failure(exit_code, input_soft_fail)
     else:
         pass
