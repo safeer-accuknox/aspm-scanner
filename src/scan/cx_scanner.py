@@ -7,7 +7,8 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 class CxScanner:
-    def __init__(self, project_name, branch, client_id, client_secret, base_uri, tenant, source_dir, repo_url, repo_branch, repo_commit_sha, repo_commit_ref, repo_name):
+    def __init__(self, scan_id, project_name, branch, client_id, client_secret, base_uri, tenant, source_dir, repo_url, repo_branch, repo_commit_sha, repo_commit_ref, repo_name):
+        self.scan_id = scan_id
         self.project_name = project_name
         self.branch = branch
         self.client_id = client_id
@@ -27,21 +28,33 @@ class CxScanner:
 
     def run(self):
         """Run the Checkmarx scan."""        
-        cx_cmd = [
-            "cx", "scan", "create",
-            "--project-name", self.project_name,
-            "--branch", self.branch,
-            "--client-id", self.client_id,
-            "--client-secret", self.client_secret,
-            "--base-uri", self.base_uri,
-            "--tenant", self.tenant,
-            "-s", self.source_dir,
-            "--report-format", self.output_format,
-            "--output-path", self.output_path
-        ]
+        if(self.scan_id):
+            cx_cmd = [
+                "cx", "results", "show",
+                "--scan-id", self.scan_id,
+                "--client-id", self.client_id,
+                "--client-secret", self.client_secret,
+                "--base-uri", self.base_uri,
+                "--tenant", self.tenant,
+                "--report-format", self.output_format,
+                "--output-path", self.output_path
+            ]
+        else:
+            cx_cmd = [
+                "cx", "scan", "create",
+                "--project-name", self.project_name,
+                "--branch", self.branch,
+                "--client-id", self.client_id,
+                "--client-secret", self.client_secret,
+                "--base-uri", self.base_uri,
+                "--tenant", self.tenant,
+                "-s", self.source_dir,
+                "--report-format", self.output_format,
+                "--output-path", self.output_path
+            ]
 
         logger.info(f"Executing command: {' '.join(cx_cmd)}")
-        # result = subprocess.run(cx_cmd, capture_output=True, text=True)
+        result = subprocess.run(cx_cmd, capture_output=True, text=True)
 
         try:
             self.process_sarif_file()
@@ -50,8 +63,7 @@ class CxScanner:
             logger.error(f"Error processing result file: {e}")
             raise
 
-        # return result.returncode, self.return_file
-        return 0, self.return_file
+        return result.returncode, self.return_file
 
     def get_code_snippet(self, lines, start_line, start_column, end_column):
         print("get_code_snippetget_code_snippet")
@@ -132,7 +144,7 @@ class CxScanner:
                 "workflow_run_number": "",
                 "repository_url": self.repo_url,
                 "workflow_run_url": "",
-                "source": "GitHub"
+                "source": ""
             }
         }
 

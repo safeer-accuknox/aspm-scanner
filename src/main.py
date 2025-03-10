@@ -51,6 +51,7 @@ def run_scan():
             upload_results(result_file, accuknox_endpoint, accuknox_tenant, accuknox_label, accuknox_token, "TruffleHog")
         handle_failure(exit_code, input_soft_fail)
     elif(scan_type == "CX"):
+        scan_id = os.environ.get('CX_SCAN_ID', None)
         project_name = os.environ.get('CX_PROJECT_NAME', None)
         branch = os.environ.get('CX_BRANCH', None)
         client_id = os.environ.get('CX_CLIENT_ID', None)
@@ -65,8 +66,9 @@ def run_scan():
         repo_commit_ref = os.environ.get('REPOSITORY_COMMIT_REF', None)
         repo_name = os.environ.get('REPOSITORY_NAME', None)
 
-        ConfigValidatorObj.validate_cx_scan(project_name, branch, client_id, client_secret, base_uri, tenant, source_dir, repo_url, repo_branch, repo_commit_sha, repo_commit_ref)
-        CxScannerObj = CxScanner(project_name, branch, client_id, client_secret, base_uri, tenant, source_dir, repo_url, repo_branch, repo_commit_sha, repo_commit_ref, repo_name)
+
+        ConfigValidatorObj.validate_cx_scan(scan_id, project_name, branch, client_id, client_secret, base_uri, tenant, source_dir, repo_url, repo_branch, repo_commit_sha, repo_commit_ref)
+        CxScannerObj = CxScanner(scan_id, project_name, branch, client_id, client_secret, base_uri, tenant, source_dir, repo_url, repo_branch, repo_commit_sha, repo_commit_ref, repo_name)
         exit_code, result_file = CxScannerObj.run()
         if(result_file):
             upload_results(result_file, accuknox_endpoint, accuknox_tenant, accuknox_label, accuknox_token, "CX")
