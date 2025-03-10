@@ -1,7 +1,7 @@
 import os
 import requests
 import logging
-from scan import IaCScanner, SecretScanner
+from scan import IaCScanner, SecretScanner, CxScanner
 from utils import ConfigValidator, upload_results, handle_failure
 
 logging.basicConfig(level=logging.INFO)
@@ -25,7 +25,6 @@ input_soft_fail = os.environ.get('INPUT_SOFT_FAIL', 'False').lower() == 'true'
 def run_scan():
     logger.info('Starting Scan...')
     ConfigValidatorObj = ConfigValidator(scan_type, accuknox_endpoint, accuknox_tenant, accuknox_label, accuknox_token, input_soft_fail)
-
     if(scan_type == "IAC"):
         input_file = os.environ.get('INPUT_FILE', '')
         input_directory = os.environ.get('INPUT_DIRECTORY', './')
@@ -50,6 +49,27 @@ def run_scan():
         exit_code, result_file = SecretScannerObj.run()
         if(result_file):
             upload_results(result_file, accuknox_endpoint, accuknox_tenant, accuknox_label, accuknox_token, "TruffleHog")
+        handle_failure(exit_code, input_soft_fail)
+    elif(scan_type == "CX"):
+        project_name = os.environ.get('CX_PROJECT_NAME', None)
+        branch = os.environ.get('CX_BRANCH', None)
+        client_id = os.environ.get('CX_CLIENT_ID', None)
+        client_secret = os.environ.get('CX_CLIENT_SECRET', None)
+        base_uri = os.environ.get('CX_BASE_URI', None)
+        tenant = os.environ.get('CX_TENANT', None)
+        source_dir = os.environ.get('INPUT_DIRECTORY', './')
+
+        repo_url = os.environ.get('REPOSITORY_URL', None)
+        repo_branch = os.environ.get('REPOSITORY_BRANCH', None)
+        repo_commit_sha = os.environ.get('REPOSITORY_COMMIT_SHA', None)
+        repo_commit_ref = os.environ.get('REPOSITORY_COMMIT_REF', None)
+        repo_name = os.environ.get('REPOSITORY_NAME', None)
+
+        ConfigValidatorObj.validate_cx_scan(project_name, branch, client_id, client_secret, base_uri, tenant, source_dir, repo_url, repo_branch, repo_commit_sha, repo_commit_ref)
+        CxScannerObj = CxScanner(project_name, branch, client_id, client_secret, base_uri, tenant, source_dir, repo_url, repo_branch, repo_commit_sha, repo_commit_ref, repo_name)
+        exit_code, result_file = CxScannerObj.run()
+        if(result_file):
+            upload_results(result_file, accuknox_endpoint, accuknox_tenant, accuknox_label, accuknox_token, "CX")
         handle_failure(exit_code, input_soft_fail)
     else:
         pass
