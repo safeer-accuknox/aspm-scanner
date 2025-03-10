@@ -66,8 +66,6 @@ class CxScanner:
         return result.returncode, self.return_file
 
     def get_code_snippet(self, lines, start_line, start_column, end_column):
-        print("get_code_snippetget_code_snippet")
-
         """Extracts a code snippet from a given file with highlighting."""
         start_line_index = max(start_line - 3, 0)  # Include 2 lines before
         end_line_index = min(start_line + 2, len(lines))  # Include 2 lines after
