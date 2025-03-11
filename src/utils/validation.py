@@ -55,35 +55,10 @@ class SecretScannerConfig(BaseModel):
     EXCLUDE_PATHS: Optional[str]
     ADDITIONAL_ARGUMENTS: Optional[str]
 
-class CxcannerWithScanIdConfig(BaseModel):
-    CX_SCAN_ID: str 
-    CX_CLIENT_ID: str
-    CX_CLIENT_SECRET: str
-    CX_BASE_URI: str
-    CX_TENANT: str
-    INPUT_DIRECTORY: str
-    REPOSITORY_URL: str
-    REPOSITORY_BRANCH: str
-    REPOSITORY_COMMIT_SHA: str
-    REPOSITORY_COMMIT_REF: str
-        
-    @field_validator("REPOSITORY_URL", "REPOSITORY_BRANCH", "REPOSITORY_COMMIT_SHA", "REPOSITORY_COMMIT_REF", mode="before")
-    @classmethod
-    def validate_required_fields(cls, v, field):
-        if not isinstance(v, str) or not v.strip():
-            raise ValueError(f"Unable to retrieve {field.field_name} from Git metadata, Please set the {field.field_name} environment variable")
-        return v
-
-    @field_validator("CX_BASE_URI")
-    @classmethod
-    def validate_base_uri(cls, v):
-        if not v.startswith("http"):
-            raise ValueError("CX_BASE_URI must be a valid URL starting with 'http'.")
-        return v
-
 class CxcannerConfig(BaseModel):
-    CX_PROJECT_NAME: str
-    CX_BRANCH: str 
+    CX_PROJECT_NAME: Optional[str] = None  
+    CX_BRANCH: Optional[str] = None  
+    CX_SCAN_ID: Optional[str] = None  
     CX_CLIENT_ID: str
     CX_CLIENT_SECRET: str
     CX_BASE_URI: str
@@ -108,6 +83,13 @@ class CxcannerConfig(BaseModel):
             raise ValueError("CX_BASE_URI must be a valid URL starting with 'http'.")
         return v
     
+    @root_validator(pre=True)
+    def validate_exclusive_fields(cls, values):
+        if values.get("CX_SCAN_ID") and (values.get("CX_PROJECT_NAME") or values.get("CX_BRANCH")):
+            raise ValueError("CX_SCAN_ID cannot be used with CX_PROJECT_NAME or CX_BRANCH.")
+        if not values.get("CX_SCAN_ID") and (not values.get("CX_PROJECT_NAME") or not values.get("CX_BRANCH")):
+            raise ValueError("Either CX_SCAN_ID or both CX_PROJECT_NAME and CX_BRANCH must be provided.")
+        return values
 
 
 class ConfigValidator:
@@ -157,34 +139,23 @@ class ConfigValidator:
 
     def validate_cx_scan(self, scan_id, project_name, branch, client_id, client_secret, base_uri, tenant, source_dir, repo_url, repo_branch, repo_commit_sha, repo_commit_ref):
         try:
-            if(scan_id):
-                self.config = CxcannerWithScanIdConfig(
-                    CX_SCAN_ID=scan_id,
-                    CX_CLIENT_ID=client_id,
-                    CX_CLIENT_SECRET=client_secret,
-                    CX_BASE_URI=base_uri,
-                    CX_TENANT=tenant,
-                    INPUT_DIRECTORY=source_dir,
-                    REPOSITORY_URL=repo_url,
-                    REPOSITORY_BRANCH=repo_branch,
-                    REPOSITORY_COMMIT_SHA=repo_commit_sha,
-                    REPOSITORY_COMMIT_REF=repo_commit_ref,
-                )
-            else:
-                self.config = CxcannerConfig(
-                    CX_PROJECT_NAME=project_name,
-                    CX_BRANCH=branch,
-                    CX_CLIENT_ID=client_id,
-                    CX_CLIENT_SECRET=client_secret,
-                    CX_BASE_URI=base_uri,
-                    CX_TENANT=tenant,
-                    INPUT_DIRECTORY=source_dir,
-                    REPOSITORY_URL=repo_url,
-                    REPOSITORY_BRANCH=repo_branch,
-                    REPOSITORY_COMMIT_SHA=repo_commit_sha,
-                    REPOSITORY_COMMIT_REF=repo_commit_ref,
-                )
+            self.config = CxcannerConfig(
+                CX_SCAN_ID=scan_id,
+                CX_PROJECT_NAME=project_name,
+                CX_BRANCH=branch,
+                CX_CLIENT_ID=client_id,
+                CX_CLIENT_SECRET=client_secret,
+                CX_BASE_URI=base_uri,
+                CX_TENANT=tenant,
+                INPUT_DIRECTORY=source_dir,
+                REPOSITORY_URL=repo_url,
+                REPOSITORY_BRANCH=repo_branch,
+                REPOSITORY_COMMIT_SHA=repo_commit_sha,
+                REPOSITORY_COMMIT_REF=repo_commit_ref,
+            )
         except ValidationError as e:
-            for error in e.errors():
-                logger.error(f"{error['loc'][0]}: {error['msg']}")
+            errors = e.errors()
+            for error in errors:
+                location = " -> ".join(str(loc) for loc in error.get("loc", []))
+                logger.error(f"{location if location else 'Validation Error'}: {error['msg']}")
             exit(1)
